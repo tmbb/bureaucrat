@@ -13,7 +13,11 @@ defmodule <%= inspect schema.module %> do<%
 
   schema <%= inspect schema.table %> do
 <%= for {k, v} <- schema.types do %>    field <%= inspect k %>, <%= inspect v %><%= schema.defaults[k] %>
-<% end %><%= for {_, k, string_alias, _} <- schema.assocs do %>    belongs_to :<%= k %>, <%= string_alias %>, on_replace: :nilify
+<% end %><%= for {_, k, string_alias, table_name_atom} <- schema.assocs do %><%
+  prefix = string_alias |> String.split(".") |> Enum.drop(-1) |> Enum.join(".")
+  module_alias = Mandarin.Naming.table_name_to_module_name(table_name_atom)
+  full_module = prefix <> "." <> module_alias
+%>    belongs_to :<%= k %>, <%= full_module %>, on_replace: :nilify
 <% end %>
     timestamps()
   end

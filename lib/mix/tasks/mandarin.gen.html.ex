@@ -97,6 +97,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
   """
   use Mix.Task
 
+  alias Mandarin.Naming
   alias Mix.Mandarin.Context
   alias Mix.Tasks.Mandarin.Gen
   require EEx
@@ -377,10 +378,11 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
 
     assocs =
       Enum.map(schema.assocs, fn
-        {key, _atom_singular_id, full_module_name, _atom_plural} ->
-          module_alias = full_module_name |> String.split(".") |> Enum.at(-1)
+        {key, _atom_singular_id, _full_module_name, atom_plural} ->
+          path_part = Naming.singularize(atom_plural)
+          module_alias = Naming.table_name_to_module_name(atom_plural)
           field = "#{module_alias}.select_search_field()"
-          path = "Routes.#{context.basename}_#{key}_path(@conn, :select)"
+          path = "Routes.#{context.basename}_#{path_part}_path(@conn, :select)"
 
           {label(key),
            ~s'''
@@ -427,10 +429,11 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
       end)
 
     assoc_filters =
-      Enum.map(schema.assocs, fn {key, _, full_module_name, _} ->
-        module_alias = full_module_name |> String.split(".") |> Enum.at(-1)
+      Enum.map(schema.assocs, fn {key, _atom_singular_id, _full_module_name, atom_plural} ->
+        path_part = Naming.singularize(atom_plural)
+        module_alias = Naming.table_name_to_module_name(atom_plural)
         field = "#{module_alias}.select_search_field()"
-        path = "Routes.#{context.basename}_#{key}_path(@conn, :select)"
+        path = "Routes.#{context.basename}_#{path_part}_path(@conn, :select)"
 
         """
                 <%= forage_horizontal_form_group #{inspect(key)} do %>

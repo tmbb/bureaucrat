@@ -10,10 +10,13 @@
   <tbody>
 <%%= for <%= schema.singular %> <- @<%= schema.plural %>.entries do %>
     <tr>
-<%= for {k, _} <- schema.attrs ++ [{:inserted_at, nil}, {:updated_at, nil}] do %>      <td><%%= <%= schema.singular %>.<%= k %> %></td>
-<% end %><%= for {k, _, _, _} <- schema.assocs do %>      <td>
-        <a href="<%%= Routes.<%= context.basename %>_<%= k %>_path(@conn, :show, <%= schema.singular %>.<%= k %>.id) %>">
-          <%%= forage_display(<%= schema.singular %>.<%= k %>) %>
+<%= for {key, _} <- schema.attrs ++ [{:inserted_at, nil}, {:updated_at, nil}] do %>      <td><%%= <%= schema.singular %>.<%= key %> %></td>
+<% end %><%= for {key, _atom_singular_id, _full_module_name, atom_plural} <- schema.assocs do %><%
+  path_part = Mandarin.Naming.singularize(atom_plural)
+  path = "Routes.#{context.basename}_#{path_part}_path"
+%>      <td>
+        <a href="<%%= <%= path %>(@conn, :show, <%= schema.singular %>.<%= key %>.id) %>">
+          <%%= forage_display(<%= schema.singular %>.<%= key %>) %>
         </a>
       </td>
 <% end %>
