@@ -1,7 +1,7 @@
 <section class="content-header">
   <h1>
     Show <%= schema.human_singular %>
-    <small><%= schema.human_singular %> (<%= schema.human_singular  %> ID: <%%= @<%= schema.singular %>.id %>)</small>
+    <small>(<%= schema.human_singular  %> ID: <%%= @<%= schema.singular %>.id %>)</small>
   </h1>
   <ol class="breadcrumb">
     <li><a href="#"><i class="fa fa-dashboard"></i> <%= schema.human_plural %></a></li>
