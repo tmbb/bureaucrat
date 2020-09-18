@@ -1,31 +1,22 @@
-<section class="content-header">
-  <h1>
-    <%= schema.human_plural %>
-    <small>(Browse <%= schema.human_plural %>)</small>
-  </h1>
-  <ol class="breadcrumb">
-    <li><a href="#"><i class="fa fa-dashboard"></i> <%= schema.human_plural %></a></li>
-    <li class="active">index</li>
-  </ol>
-</section>
+<h1>
+  <%%= dgettext("mandarin.<%= context.basename %>", "<%= schema.human_plural %>") %>
+  <small><%%= dgettext("mandarin.<%= context.basename %>", "(Browse <%= schema.human_plural %>)") %></small>
+</h1>
 
-<section class="content container-fluid">
-  <div class="box box-primary with-border">
-    <div class="box-body">
-      <%%# Table %>
-      <%%= render "table.html", assigns %>
-      <%%# Pagination %>
-      <%%= <%= context.basename %>_<%= schema.singular %>_pagination_widget(@conn, @<%= schema.plural %>, previous: "« Previous", next: "Next »") %>
-    </div>
+<%% new_link_content = [content_tag(:i, "", class: "fa fa-plus"), dgettext("mandarin.<%= context.basename %>", " Create New")] %>
+<span><%%= link new_link_content, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :new), class: "btn btn-block btn-primary my-3" %></span>
 
-    <div class="box-footer">
-      <%% new_link_content = [content_tag(:i, "", class: "fa fa-plus"), " New"]  %>
-      <span><%%= link new_link_content, to: Routes.<%= context.basename %>_<%= schema.route_helper %>_path(@conn, :new), class: "btn btn-default" %></span>
-    </div>
-  </div>
+<%%# Table %>
+<%%= render "table.html", assigns %>
 
-  <%%# Filters %>
-  <div class="box-group">
-    <%%= render "filters.html", assigns %>
-  </div>
-</section>
+<%%# Pagination %>
+<%%= <%= context.basename %>_<%= schema.singular %>_pagination_widget(
+        @conn,
+        @<%= schema.plural %>,
+        previous: dgettext("mandarin.<%= context.basename %>", "« Previous"),
+        next: dgettext("mandarin.<%= context.basename %>", "Next »")
+      ) %>
+
+<%%# Filters %>
+<%%= render "filters.html", assigns %>
+

@@ -130,7 +130,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
 
   @links_end "\n  <%# %% Resource Links - END %% %>\n"
 
-  defp maybe_insert_links(file, schema) do
+  defp maybe_insert_links(file, context, schema) do
     contents = File.read!(file)
     link_header = "<%# Sidebar links for #{inspect(schema.alias)} %>"
 
@@ -143,7 +143,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
       false ->
         case String.split(contents, @links_end, parts: 2) do
           [part1, part2] ->
-            link = sidebar_link(schema)
+            link = sidebar_link(context, schema)
             new_contents = part1 <> "\n" <> String.trim_trailing(link) <> @links_end <> part2
 
             File.write!(file, new_contents)
@@ -159,7 +159,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
     :defp,
     :sidebar_link,
     "priv/templates/mandarin.gen.html/sidebar-link.html.eex",
-    [:schema]
+    [:context, :schema]
   )
 
   defp maybe_add_links_to_sidebar(%Context{schema: schema, context_app: context_app} = context) do
@@ -169,7 +169,7 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
       Path.join([web_prefix, "templates", "#{context.basename}_layout", "sidebar.html.eex"])
 
     if File.exists?(sidebar_template_path) do
-      maybe_insert_links(sidebar_template_path, schema)
+      maybe_insert_links(sidebar_template_path, context, schema)
     end
 
     context
@@ -341,17 +341,17 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
            error(key)}
 
         {key, :boolean} ->
-          {label(key), ~s(<%= checkbox f, #{inspect(key)}, class: "form-control"  %>), error(key)}
+          {label(key), ~s(<%= checkbox f, #{inspect(key)}, class: "form-control" %>), error(key)}
 
         {key, :text} ->
-          {label(key), ~s(<%= textarea f, #{inspect(key)}, class: "form-control"  %>), error(key)}
+          {label(key), ~s(<%= textarea f, #{inspect(key)}, class: "form-control" %>), error(key)}
 
         {key, :date} ->
-          {label(key), ~s(<%= forage_date_input f, #{inspect(key)}, class: "form-control"  %>),
+          {label(key), ~s(<%= forage_date_input f, #{inspect(key)}, class: "form-control" %>),
            error(key)}
 
         {key, :time} ->
-          {label(key), ~s(<%= time_select f, #{inspect(key)}, class: "form-control"  %>),
+          {label(key), ~s(<%= time_select f, #{inspect(key)}, class: "form-control" %>),
            error(key)}
 
         {key, :utc_datetime} ->
@@ -421,9 +421,9 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
           other when other in [:numeric, :date, :text] ->
             # Indent the text here becuase it's easier than indenting it in the template
             """
-                    <%= forage_horizontal_form_group #{inspect(key)} do %>
-                      <%= forage_#{other}_filter(f, #{inspect(key)}) %>
-                    <% end %>\
+              <%= forage_horizontal_form_group #{inspect(key)} do %>
+                <%= forage_#{other}_filter(f, #{inspect(key)}) %>
+              <% end %>\
             """
         end
       end)
@@ -436,11 +436,11 @@ defmodule Mix.Tasks.Mandarin.Gen.Html do
         path = "Routes.#{context.basename}_#{path_part}_path(@conn, :select)"
 
         """
-                <%= forage_horizontal_form_group #{inspect(key)} do %>
-                  <%= forage_select_filter f, :#{key},
-                        path: #{path},
-                        remote_field: #{field} %>
-                <% end %>\
+          <%= forage_horizontal_form_group #{inspect(key)} do %>
+            <%= forage_select_filter f, :#{key},
+                  path: #{path},
+                  remote_field: #{field} %>
+          <% end %>\
         """
       end)
 

@@ -26,7 +26,8 @@ defmodule Mandarin.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.4"},
-      {:forage, "~> 0.2"},
+      # {:forage, "~> 0.2"},
+      {:forage, path: "../forage"},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},
       {:inflex, "~> 2.0.0"},

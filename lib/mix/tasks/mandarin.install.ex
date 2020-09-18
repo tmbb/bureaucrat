@@ -63,9 +63,6 @@ defmodule Mix.Tasks.Mandarin.Install do
     # These paths are relative to the user's project (because they are used at runtime)
     layout_html_path = Path.join([web_prefix, "templates", layout_dir, "layout.html.eex"])
 
-    main_header_html_path =
-      Path.join([web_prefix, "templates", layout_dir, "main-header.html.eex"])
-
     sidebar_html_path = Path.join([web_prefix, "templates", layout_dir, "sidebar.html.eex"])
 
     layout_view_path =
@@ -98,12 +95,11 @@ defmodule Mix.Tasks.Mandarin.Install do
     # Add pagination capabilities to the Repo
     customize_repo(install)
 
-    paths = [layout_html_path, main_header_html_path, sidebar_html_path, layout_view_path]
+    paths = [layout_html_path, sidebar_html_path, layout_view_path]
 
     prompt_for_conflicts(paths)
 
     write_p!(layout_html_path, layout_html(install))
-    write_p!(main_header_html_path, main_header_html(install))
     write_p!(sidebar_html_path, sidebar_html(install))
     write_p!(layout_view_path, layout_view(install))
     # Index page
@@ -177,7 +173,6 @@ defmodule Mix.Tasks.Mandarin.Install do
 
   # These paths are relative to the mandarin project (because they are used at compile time)
   @external_resource "priv/templates/mandarin.install/layout.html.eex"
-  @external_resource "priv/templates/mandarin.install/main-header.html.eex"
   @external_resource "priv/templates/mandarin.install/sidebar.html.eex"
   @external_resource "priv/templates/mandarin.install/layout_view.ex"
   @external_resource "priv/templates/mandarin.install/router.ex"
@@ -195,16 +190,9 @@ defmodule Mix.Tasks.Mandarin.Install do
 
   EEx.function_from_file(
     :defp,
-    :main_header_html,
-    "priv/templates/mandarin.install/main-header.html.eex",
-    [:_install]
-  )
-
-  EEx.function_from_file(
-    :defp,
     :sidebar_html,
     "priv/templates/mandarin.install/sidebar.html.eex",
-    [:_install]
+    [:install]
   )
 
   EEx.function_from_file(
@@ -225,7 +213,7 @@ defmodule Mix.Tasks.Mandarin.Install do
     :defp,
     :index_template,
     "priv/templates/mandarin.install/index.html.eex",
-    [:_install]
+    [:install]
   )
 
   EEx.function_from_file(
