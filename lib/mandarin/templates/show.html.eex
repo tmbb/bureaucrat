@@ -1,0 +1,51 @@
+<h1><%%= <%= CodeGen.dgettext(p, "Show " <> Naming.humanize_alias(p.schema)) %> %></h1>
+
+<h4>(<%%= <%= CodeGen.dgettext(p, "ID:") %> %> <%%= @<%= p.resource %>.id %>)</h4>
+
+<table class="table">
+  <tbody><%= for field_name <- p.show_fields do %><% field_type = p.field_types[field_name] %>
+    <tr>
+      <td class="col-3"><strong><%%= <%= CodeGen.dgettext(p, Naming.humanize(field_name) <> ":") %> %></strong></td>
+      <%=
+      if Mandarin.EctoSchemaData.singular_assoc?(field_type) do %><td class="col-9"><%
+
+        url = CodeGen.route_to(p.scope, p.schema, [
+                quote(do: @conn),
+                :show,
+                CodeGen.code("@#{p.resource}.#{field_name}.id")
+              ])
+
+       html = CodeGen.call_mfa(p.resource_displayer, :as_html, [CodeGen.code("@#{p.resource}.#{field_name}")])
+
+      %><a href="<%%= <%= url %> %>"><%
+      %><%%= <%= html %> %></td>
+      <% end %><%= if Mandarin.EctoSchemaData.plural_assoc?(field_type) do %>
+      <td class="col-9">
+        <ul>
+          <%%= for item <- @<%= p.resource %>.<%= field_name %> do %><%
+
+            url = CodeGen.route_to(p.scope, field_type.related, [quote(do: @conn), :show, quote(do: item.id)])
+            html = CodeGen.call_mfa(p.resource_displayer, :as_html, [quote(do: item)])
+
+          %>
+            <li><a href="<%%= <%= url %> %>"><%%= <%= html %> %></a></li>
+          <%% end %>
+        </ul>
+      </td><% end %><%
+      %><%= if Mandarin.EctoSchemaData.simple_field?(field_type) do %><td class="col-8"><%
+      %><%%= @<%= p.resource %>.<%= field_name %> %></td><% end %>
+    </tr>
+  <% end %><tbody>
+</table>
+
+<%% edit_link_content = [content_tag(:i, "", class: "fa fa-edit"), <%= CodeGen.dgettext(p, " Edit") %>] %>
+<%% back_link_content = [content_tag(:i, "", class: "fa fa-arrow-left"), <%= CodeGen.dgettext(p, " Back") %>] %><%
+
+  url_edit = CodeGen.route_to(p.scope, p.schema, [quote(do: @conn), :edit, CodeGen.code("@#{p.resource}.id")])
+
+%>
+
+<span><%%= link edit_link_content, to: <%= url_edit %>, class: "btn btn-block btn-primary" %></span>
+<hr/>
+<%%# Copy the functionality of the back button exactly %>
+<button onclick="window.history.back()" class="btn btn-block btn-primary "><%%= back_link_content %></button>

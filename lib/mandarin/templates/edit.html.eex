@@ -1,0 +1,16 @@
+<h1><%%= <%= CodeGen.dgettext(p, "Show " <> Naming.humanize_alias(p.schema)) %> %></h1>
+
+<h4>(<%%= <%= CodeGen.dgettext(p, "ID:") %> %> <%%= @<%= p.resource %>.id %>)</h4><%
+  action = CodeGen.route_to(p.scope, p.schema, [
+              quote(do: @conn),
+              :update,
+              CodeGen.code("@#{p.resource}")
+            ])
+%>
+
+<%%= render "form.html", Map.put(assigns, :action, <%= action %>) %>
+
+<%% back_link_content = [content_tag(:i, "", class: "fa fa-arrow-left"), " ", <%= CodeGen.dgettext(p, "Back") %>] %>
+<%%# Copy the functionality of the back button exactly %>
+<button onclick="window.history.back()" class="btn btn-block btn-primary"><%%= back_link_content %></button>
+

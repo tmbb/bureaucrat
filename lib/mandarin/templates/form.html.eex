@@ -1,0 +1,19 @@
+<%%= form_for @changeset, @action, fn f -> %>
+  <%%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p><%%= dgettext("mandarin.<%= p.scope_underscore %>", "Oops, something went wrong! Please check the errors below.") %></p>
+    </div>
+  <%% end %>
+<%= for {label, input, error} <- opts[:form_input_data], input do %>
+  <div class="form-group">
+    <%= label %>
+    <div class="col-sm-10">
+      <%= input %>
+      <%= error %>
+    </div>
+  </div>
+<% end %>
+  <div class="form-group">
+    <%%= submit dgettext("mandarin.<%= p.scope_underscore %>", "Save"), class: "btn btn-block btn-primary" %>
+  </div>
+<%% end %>

@@ -1,0 +1,15 @@
+<h1><%%= <%= CodeGen.dgettext(p, "Show " <> (p.schema |> Naming.humanize_alias() |> Naming.pluralize())) %> %></h1>
+
+<%%# Table %>
+<%%= render "table.html", assigns %>
+
+<%%# Pagination %>
+<%%= <%= p.scope_underscore %>_<%= p.resource %>_pagination_widget(
+        @conn,
+        @page,
+        previous: dgettext("mandarin.<%= p.scope_underscore %>", "« Previous"),
+        next: dgettext("mandarin.<%= p.scope_underscore %>", "Next »")
+      ) %>
+
+<%%# Filters %>
+<%%= render "filters.html", assigns %>

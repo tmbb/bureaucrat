@@ -1,7 +1,9 @@
 defmodule Mandarin.Naming do
   @moduledoc false
 
-  # Conveniences for inflecting and working with names in Mandarin
+  # Conveniences for inflecting and working with names in Mandarin.
+  # Many of these functions are unsafe because they generate atoms at runtime.
+  # They should only be used during project compilation and not with user-provided input.
 
   @doc """
   Extracts the resource name from an alias.
@@ -49,6 +51,44 @@ defmodule Mandarin.Naming do
     end
   end
 
+  def module_alias(module) do
+    module
+    |> Module.split()
+    |> List.last()
+  end
+
+  def module_suffix(module) do
+    module
+    |> Module.split()
+    |> List.last()
+    |> List.wrap()
+    |> Module.concat()
+  end
+
+  def module_suffix_underscore(module) do
+    module
+    |> Module.split()
+    |> List.last()
+    |> Macro.underscore()
+  end
+
+  def module_alias_to_underscore(module) do
+    module_alias_to_underscore(module, :string)
+  end
+
+  def module_alias_to_underscore(module, :atom) do
+    module
+    |> module_alias_to_underscore(:string)
+    |> String.to_atom()
+  end
+
+  def module_alias_to_underscore(module, :string) do
+    module
+    |> Module.split()
+    |> List.last()
+    |> Macro.underscore()
+  end
+
   @doc """
   Converts String to underscore case.
 
@@ -65,7 +105,6 @@ defmodule Mandarin.Naming do
 
   """
   @spec underscore(String.t()) :: String.t()
-
   def underscore(value), do: Macro.underscore(value)
 
   defp to_lower_char(char) when char in ?A..?Z, do: char + 32
@@ -119,6 +158,15 @@ defmodule Mandarin.Naming do
   end
 
   @doc """
+  Converts a singular to a plural.
+  """
+  def pluralize(atom) when is_atom(atom),
+    do: pluralize(Atom.to_string(atom))
+
+  def pluralize(string) when is_binary(string),
+    do: Inflex.pluralize(string)
+
+  @doc """
   ...
   """
   def table_name_to_module_name(atom) when is_atom(atom),
@@ -151,6 +199,8 @@ defmodule Mandarin.Naming do
   def humanize(atom) when is_atom(atom),
     do: humanize(Atom.to_string(atom))
 
+  def humanize("Elixir." <> rest), do: humanize(rest)
+
   def humanize(bin) when is_binary(bin) do
     bin =
       if String.ends_with?(bin, "_id") do
@@ -160,5 +210,18 @@ defmodule Mandarin.Naming do
       end
 
     bin |> String.replace("_", " ") |> String.capitalize()
+  end
+
+  def humanize_alias(module) do
+    module
+    |> module_alias()
+    |> humanize()
+  end
+
+  def humanize_and_pluralize_alias(module) do
+    module
+    |> module_alias()
+    |> humanize()
+    |> pluralize()
   end
 end

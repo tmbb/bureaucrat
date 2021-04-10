@@ -1,7 +1,7 @@
 defmodule Mandarin.MixProject do
   use Mix.Project
 
-  @version "0.3.0"
+  @version "0.4.0"
 
   def project do
     [
@@ -25,13 +25,14 @@ defmodule Mandarin.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:phoenix, "~> 1.4"},
+      {:phoenix, "~> 1.5"},
+      {:paginator, "~> 1.0"},
       # {:forage, "~> 0.2"},
       {:forage, path: "../forage"},
       {:ecto, "~> 3.0"},
       {:ecto_sql, "~> 3.0"},
       {:inflex, "~> 2.0.0"},
-      {:ex_doc, "~> 0.19", only: :dev}
+      {:ex_doc, "~> 0.23", only: :dev}
     ]
   end
 

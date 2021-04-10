@@ -1,0 +1,71 @@
+
+<table class="table table-striped mt-4">
+  <thead>
+    <tr><%= for field_name <- p.list_fields do %><%
+        field_type = p.field_types[field_name]
+        assoc? = Mandarin.EctoSchemaData.assoc?(field_type)
+        humanized = Naming.humanize(field_name)
+        sort_link = "#{p.scope_underscore}_#{p.schema_underscore}_sort_link"
+      %>
+      <%= if not assoc? do %><%
+      %><th><%%= <%= sort_link %>(@conn, :<%= field_name %>, <%= CodeGen.dgettext(p, humanized) %>) %></th><% end %><%
+      %><%= if assoc? do %><%
+      %><th><%%= <%= CodeGen.dgettext(p, humanized) %> %></th><% end %><% end %>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  <%%= for <%= p.resource %> <- @page.entries do %>
+    <tr><%= for field_name <- p.list_fields do %><% field_type = p.field_types[field_name] %>
+      <%= if Mandarin.EctoSchemaData.singular_assoc?(field_type) do %><td><%
+
+            url = CodeGen.route_to(p.scope, field_type.related, [
+                      quote(do: @conn),
+                      :show,
+                      CodeGen.code("#{p.resource}.#{field_name}.id")
+                    ])
+
+            html = CodeGen.call_mfa(p.resource_displayer, :as_html, [CodeGen.code("#{p.resource}.#{field_name}")])
+
+        %><a href="<%%= <%= url %> %>"><%%= <%= html %> %><a></td><%
+        %><% end %><%= if Mandarin.EctoSchemaData.plural_assoc?(field_type) do %><td>
+        <ul>
+          <%%= for item <- <%= p.resource %>.<%= field_name %> do %><%
+
+            url = CodeGen.route_to(p.scope, field_type.related, [
+                      quote(do: @conn),
+                      :show,
+                      CodeGen.code("#{p.resource}.#{field_name}.id")
+                    ])
+
+            html = CodeGen.call_mfa(p.resource_displayer, :as_html, [CodeGen.code("#{p.resource}.#{field_name}")])
+
+          %>
+            <li><a href="<%%= <%= url %> %>"><%%= <%= html %></a></li>
+          <%% end %>
+        </ul>
+        </td><% end %><%= if Mandarin.EctoSchemaData.simple_field?(field_type) do %><%
+        %><td><%%= <%= p.resource %>.<%= field_name %> %></td><% end %><%
+        %><% end %>
+      <td>
+        <%%# Icon definitions %>
+        <%% show_icon = content_tag(:i, "", class: "px-1 fa fa-eye", title: <%= CodeGen.dgettext(p, "Show") %>) %>
+        <%% edit_icon = content_tag(:i, "", class: "px-1 fa fa-edit", title: <%= CodeGen.dgettext(p, "Edit") %>) %>
+        <%% delete_icon = content_tag(:i, "", class: "px-1 fa fa-trash", title: <%= CodeGen.dgettext(p, "Delete") %> ) %>
+        <%%# Links %>
+        <div class="pull-right"><%
+          at_resource = "#{p.resource}.id"
+          url_show = CodeGen.route_to(p.scope, p.schema, [quote(do: @conn), :show, CodeGen.code(at_resource)])
+          url_edit = CodeGen.route_to(p.scope, p.schema, [quote(do: @conn), :edit, CodeGen.code(at_resource)])
+          url_delete = CodeGen.route_to(p.scope, p.schema, [quote(do: @conn), :delete, CodeGen.code(at_resource), quote(do: @conn.params)])
+        %>
+          <%%= link show_icon, to: <%= url_show %> %>
+          <%%= link edit_icon, to: <%= url_edit %> %>
+          <%%= link delete_icon, to: <%= url_delete %>,
+                  method: :delete, data: [confirm: <%= CodeGen.dgettext(p, "Are you sure?") %>], class: "text-danger" %>
+        </div>
+      </td>
+    </tr>
+  <%% end %>
+  </tbody>
+</table>

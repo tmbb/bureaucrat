@@ -1,0 +1,9 @@
+<h4><%%= dgettext("mandarin.<%= p.scope_underscore %>", "Search filters") %></h4>
+
+<%%= <%= p.scope_underscore %>_<%= p.schema_underscore %>_search_form_for @conn, [], fn f -> %>
+<%= for filter <- opts[:filters], filter do %>
+<%= filter %>
+<% end %>
+  <%% search_button_content = [content_tag(:i, "", class: "fa fa-search"), dgettext("mandarin.<%= p.scope_underscore %>", " Search")] %>
+  <%%= submit search_button_content, class: "btn btn-block btn-primary" %>
+<%% end %>
