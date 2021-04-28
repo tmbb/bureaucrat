@@ -1,5 +1,6 @@
 defmodule Mandarin.Routes do
   alias Mandarin.GlobalParameters
+  alias Mandarin.Naming
   @moduledoc false
   def route_function_name(scope_underscore, resource) do
     name = "#{scope_underscore}_#{resource}_path"
@@ -42,6 +43,7 @@ defmodule Mandarin.Routes do
     layout_pipeline_name = global_parameters.layout_pipeline_name
     layout_view_module = global_parameters.layout_view_module
     layout_view_template = global_parameters.layout_view_template
+    index_controller_alias = Naming.module_suffix(global_parameters.index_controller_module)
 
     quote do
       require Phoenix.Router
@@ -64,6 +66,7 @@ defmodule Mandarin.Routes do
 
         Phoenix.Router.pipe_through(unquote(layout_pipeline_name))
 
+        get "/", unquote(index_controller_alias), :index
         # Add the Mandarin routes
         unquote_splicing(route_calls)
       end

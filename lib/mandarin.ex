@@ -3,16 +3,22 @@ defmodule Mandarin do
   Uses some magic to generate an Admin framework for your application.
   """
 
-  alias Mandarin.AccessorCreator
-  alias Mandarin.ControllerCreator
-  alias Mandarin.ViewCreator
-  alias Mandarin.Routes
-  alias Mandarin.Parameters
-  alias Mandarin.GlobalParameters
-  alias Mandarin.Debugger
-  alias Mandarin.DebugConfig
+  alias Mandarin.{
+    AccessorCreator,
+    ControllerCreator,
+    ViewCreator,
+    IndexCreator,
+    Routes,
+    Parameters,
+    GlobalParameters,
+    Debugger,
+    DebugConfig,
+    Theme
+  }
+
   require ExUnit.Assertions, as: Assertions
 
+  @default_theme "journal"
 
   defmacro add_resource(module, options \\ []) do
     quote do
@@ -23,7 +29,6 @@ defmodule Mandarin do
       )
     end
   end
-
 
   defp list_of_maps_to_map_of_lists(list_of_maps) do
     Enum.reduce(list_of_maps, %{}, fn new_map, acc1 ->
@@ -89,6 +94,7 @@ defmodule Mandarin do
     scope = Module.get_attribute(module, :__mandarin_magik_scope__)
     arguments = Module.get_attribute(module, :__mandarin_magik_resources__)
     debug_arguments = Module.get_attribute(module, :__mandarin_magik_debug__)
+    args = Module.get_attribute(module, :__mandarin_magik_args__, [])
 
     debug_config =
       case debug_arguments do
@@ -106,17 +112,22 @@ defmodule Mandarin do
     schemas = Enum.map(arguments, fn {schema, _} -> schema end)
 
     global_parameters = GlobalParameters.new(
+      app: args[:app],
       master_module: module,
       repo: repo,
       app_web_namespace: app_web_namespace,
       scope: scope,
       schemas: schemas,
-      arguments: arguments
+      arguments: arguments,
+      copyright: args[:copyright],
+      theme: args[:theme]
     )
 
+    Theme.setup_theme(global_parameters)
     # Create the layout view from the global parameters
     # (later we'll create individual views for each resource)
     ViewCreator.create_layout_view(global_parameters)
+    IndexCreator.create_index(global_parameters)
 
     {resource_data, route_calls} = build_resources(global_parameters, arguments)
     # Assert that we are returning a map
@@ -124,6 +135,7 @@ defmodule Mandarin do
 
     Debugger.debug(debug_config, resource_data)
 
+    theme_path = Theme.relative_theme_css_path(global_parameters)
     # You need to escape them or otherwise Elixir will try to
     # execute the router calls during macro expansion
     escaped_route_calls = Macro.escape(route_calls)
@@ -136,6 +148,13 @@ defmodule Mandarin do
       Print help text for the Admin interface.
       """
       defdelegate help(), to: Mandarin
+
+      @doc """
+      Path to the admin interface theme
+      """
+      def theme_path() do
+        unquote(theme_path)
+      end
 
       @doc """
       Creates a scope in the router and adds the routes for the resources.
@@ -156,9 +175,12 @@ defmodule Mandarin do
 
   defmacro __using__(options) do
     repo = Keyword.fetch!(options, :repo)
+    app = Keyword.fetch!(options, :app)
     app_web_namespace = Keyword.fetch!(options, :app_web)
     scope = Keyword.fetch!(options, :scope)
     debug = Keyword.get(options, :debug, [])
+    theme = Keyword.get(options, :theme, {:bootswatch, @default_theme})
+    copyright = Keyword.get(options, :copyright)
 
     quote do
       import Mandarin, only: [
@@ -174,11 +196,17 @@ defmodule Mandarin do
         accumulate: true
       )
 
+      # Maybe we should store all of this in the same attribute...
       @__mandarin_magik_module__ __MODULE__
       @__mandarin_magik_repo__ unquote(repo)
       @__mandarin_magik_app_web_namespace__ unquote(app_web_namespace)
       @__mandarin_magik_scope__ unquote(scope)
       @__mandarin_magik_debug__ unquote(debug)
+      @__mandarin_magik_args__ [
+        theme: unquote(theme),
+        app: unquote(app),
+        copyright: unquote(copyright)
+      ]
 
       def as_html(item), do: as_text(item)
 

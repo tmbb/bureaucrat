@@ -1,4 +1,5 @@
 defmodule Mandarin.Debugger do
+  @moduledoc false
   alias Mandarin.DebugConfig
   alias Mandarin.Naming
 

@@ -6,7 +6,7 @@
     <title><%%= dgettext("mandarin.<%= p.scope_underscore %>", "<%= inspect(p.app_web_namespace) %>") %></title>
     <%# Tell the browser to be responsive to screen width %>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="<%%= Routes.static_path(@conn, <%= p.master_module %>.theme_path()) %>">
     <%# Font Awesome %>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -81,24 +81,9 @@
         <p class="mb-1">
           <%%= raw(
             dgettext("mandarin.<%= p.scope_underscore %>", """
-            <strong>Copyright &copy; <%= DateTime.utc_now() |> Map.fetch!(:year) %> <a href="#"><%= p.app_web_namespace %></a>.</strong> All rights reserved.
+            <strong>Copyright &copy; <%= DateTime.utc_now() |> Map.fetch!(:year) %> <a href="#"><%= p.copyright %></a>.</strong> All rights reserved.
             """)) %>
         </p>
-
-        <ul class="list-inline">
-          <%## Make it so that this link leads somewhere or delete it %>
-          <li class="list-inline-item">
-            <a href="#"><%%= dgettext("mandarin.<%= p.scope_underscore %>", "Privacy") %></a>
-          </li>
-          <%## Make it so that this link leads somewhere or delete it %>
-          <li class="list-inline-item">
-            <a href="#"><%%= dgettext("mandarin.<%= p.scope_underscore %>", "Terms") %></a>
-          </li>
-          <%## Make it so that this link leads somewhere or delete it %>
-          <li class="list-inline-item">
-            <a href="#"><%%= dgettext("mandarin.<%= p.scope_underscore %>", "Support") %></a>
-          </li>
-        </ul>
       </footer>
     </div>
 

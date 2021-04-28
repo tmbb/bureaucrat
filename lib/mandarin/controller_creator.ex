@@ -2,7 +2,6 @@ defmodule Mandarin.ControllerCreator do
   alias Mandarin.Naming
   alias Mandarin.Routes
   alias Mandarin.Parameters
-  alias Mandarin.CodeGen
 
   def create_controller(%Parameters{} = parameters) do
     schema = parameters.schema
@@ -19,7 +18,7 @@ defmodule Mandarin.ControllerCreator do
 
     contents =
       quote do
-        use Phoenix.Controller, namespace: MandarinOfficeWeb
+        use Phoenix.Controller, namespace: unquote(controller_module)
         import Plug.Conn
 
         # Adds the the resource type to the conn

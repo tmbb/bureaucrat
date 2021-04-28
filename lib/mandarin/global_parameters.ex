@@ -2,7 +2,8 @@ defmodule Mandarin.GlobalParameters do
   alias Mandarin.Naming
   alias Mandarin.EctoSchemaData
 
-  defstruct master_module: nil,
+  defstruct app: nil,
+            master_module: nil,
             search_fields: nil,
             schemas_underscore_map: nil,
             repo: nil,
@@ -13,11 +14,24 @@ defmodule Mandarin.GlobalParameters do
             scope_underscore: nil,
             layout_view_module: nil,
             layout_view_template: nil,
-            layout_pipeline_name: nil
+            layout_pipeline_name: nil,
+            index_view_module: nil,
+            index_controller_module: nil,
+            copyright: nil,
+            theme: nil
 
   defp join_modules(left, right) do
     Module.concat([inspect(left) <> inspect(right)])
   end
+
+  defp pretty_copyright(copyright) when is_atom(copyright) do
+    case to_string(copyright) do
+      "Elixir." <> rest -> rest
+      other -> other
+    end
+  end
+
+  defp pretty_copyright(other), do: other
 
   def possible_id_field?(field) do
     field
@@ -56,12 +70,15 @@ defmodule Mandarin.GlobalParameters do
   end
 
   def new(options) do
+    app = Keyword.fetch!(options, :app)
     master_module = Keyword.fetch!(options, :master_module)
     repo = Keyword.fetch!(options, :repo)
     app_web_namespace = Keyword.fetch!(options, :app_web_namespace)
     scope = Keyword.fetch!(options, :scope)
     schemas = Keyword.fetch!(options, :schemas)
     arguments = Keyword.fetch!(options, :arguments)
+    copyright = Naming.module_alias(app_web_namespace)
+    theme = Keyword.fetch!(options, :theme)
 
     search_fields =
       arguments
@@ -76,7 +93,23 @@ defmodule Mandarin.GlobalParameters do
         app_web_namespace,
         join_modules(scope_suffix, LayoutView)
       )
+
     layout_view_module = default_layout_view_module
+
+    index_view_module =
+      Module.concat([
+        app_web_namespace,
+        scope_suffix,
+        SplashPageIndexView
+      ])
+
+    index_controller_module =
+      Module.concat([
+        app_web_namespace,
+        scope_suffix,
+        SplashPageIndexController
+      ])
+
 
     default_layout_view_template = "layout.html"
     layout_view_template = default_layout_view_template
@@ -85,6 +118,7 @@ defmodule Mandarin.GlobalParameters do
       String.to_atom("__mandarin_magik_#{scope_underscore}_layout__")
 
     %__MODULE__{
+      app: app,
       master_module: master_module,
       search_fields: search_fields,
       repo: repo,
@@ -95,8 +129,11 @@ defmodule Mandarin.GlobalParameters do
       schemas: schemas,
       layout_view_module: layout_view_module,
       layout_view_template: layout_view_template,
-      layout_pipeline_name: layout_pipeline_name
+      layout_pipeline_name: layout_pipeline_name,
+      index_controller_module: index_controller_module,
+      index_view_module: index_view_module,
+      copyright: pretty_copyright(copyright),
+      theme: theme
     }
   end
-
 end
